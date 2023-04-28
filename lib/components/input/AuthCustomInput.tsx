@@ -24,6 +24,9 @@ const AuthCustomInput = ({
   placeHolder,
   inputType,
   iconType = 'material-community',
+  onChange = (e: string) => {
+    console.log({'unimplemented on ': placeHolder}, {text: e});
+  },
 }: props) => {
   const windowDim = Dimensions.get('window');
 
@@ -62,6 +65,9 @@ const AuthCustomInput = ({
           keyboardType={inputType}
           style={{color: '#000'}}
           placeholderTextColor="#aaa"
+          onChange={e => {
+            onChange(e.nativeEvent.text);
+          }}
         />
       </View>
     </View>

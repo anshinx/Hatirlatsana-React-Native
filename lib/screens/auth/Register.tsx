@@ -7,6 +7,7 @@ import {
   Button,
   TouchableOpacity,
   ScaledSize,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import {ColorSchema} from '../../assets';
@@ -15,12 +16,18 @@ import {acur} from '../../assets';
 import LinearGradient from 'react-native-linear-gradient';
 import AuthCustomButton from '../../components/button/AuthCustomButton';
 import {useNavigation} from '@react-navigation/native';
+import {Icon} from '@rneui/base';
+import {ColorState} from '../../redux/reducers/colors.reducer';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../redux/store/store';
 
 const Register = () => {
   const useNav: any = useNavigation();
   const windowDim = Dimensions.get('window');
-  const styles = useStyles(windowDim);
+  const colors = useSelector((state: RootState) => state.colors);
+  const styles = useStyles(windowDim, colors);
   const [screenIndex, setScreenIndex] = React.useState(0);
+
   const handleNav = () => {
     useNav.navigate('Login');
   };
@@ -30,7 +37,12 @@ const Register = () => {
       {/* Fırst Screen (Email) */}
       <Image source={acur} resizeMode="contain" style={styles.image} />
       <View style={styles.inputZone}>
-        <Text style={styles.registerText}>Register</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <Text />
+          {/*used as blok */}
+          <Text style={styles.registerText}>Register</Text>
+          <Text />
+        </View>
         <Text style={styles.text}>Email</Text>
         <AuthCustomInput
           isHidden={false}
@@ -49,7 +61,7 @@ const Register = () => {
               touchSoundDisabled={true}
               style={{justifyContent: 'flex-end'}}
               onPress={() => handleNav()}>
-              <Text>Already in? Login</Text>
+              <Text style={styles.alreadyLogin}>Already in? Login</Text>
             </TouchableOpacity>
           </View>
           <AuthCustomButton
@@ -60,18 +72,31 @@ const Register = () => {
           />
         </View>
       </View>
+      <Text style={styles.terms}>
+        By Registering You Accept Terms And Conditions
+      </Text>
     </View>,
     <View style={styles.mainView}>
       {/* Screen (Username - Password)*/}
       <Image source={acur} resizeMode="contain" style={styles.image} />
       <View style={styles.inputZone}>
-        <Text style={styles.registerText}>Register</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <Pressable
+            onPress={() => {
+              setScreenIndex(screenIndex - 1);
+            }}>
+            <Icon type="font-awesome" name="arrow-left" />
+          </Pressable>
+          <Text style={styles.registerText}>Register</Text>
+          <Text style={{marginHorizontal: windowDim.scale * 3}} />
+        </View>
         <Text style={styles.text}>Username</Text>
         <AuthCustomInput
           isHidden={false}
           inputType="email-address"
           placeHolder="Username"
-          icon="human"
+          icon="user"
+          iconType="font-awesome"
         />
         <Text style={styles.text}>Password</Text>
         <AuthCustomInput
@@ -86,14 +111,7 @@ const Register = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <View>
-            <TouchableOpacity
-              touchSoundDisabled={true}
-              style={{justifyContent: 'flex-end'}}
-              onPress={() => handleNav()}>
-              <Text>Already in? Login</Text>
-            </TouchableOpacity>
-          </View>
+          <View></View>
           <AuthCustomButton
             title={'Next'}
             onPressEvent={() => {
@@ -101,24 +119,40 @@ const Register = () => {
             }}
           />
         </View>
+        <Text style={styles.terms}>
+          By Registering You Accept Terms And Conditions
+        </Text>
       </View>
     </View>,
     <View style={styles.mainView}>
       {/* Screen ( Name - Surname )*/}
       <Image source={acur} resizeMode="contain" style={styles.image} />
       <View style={styles.inputZone}>
-        <Text style={styles.registerText}>Register</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <Pressable
+            onPress={() => {
+              setScreenIndex(screenIndex - 1);
+            }}>
+            <Icon type="font-awesome" name="arrow-left" />
+          </Pressable>
+          <Text style={styles.registerText}>Register</Text>
+          <Text style={{marginHorizontal: windowDim.scale * 3}} />
+        </View>
         <Text style={styles.text}>Name</Text>
         <AuthCustomInput
           isHidden={false}
           inputType="email-address"
           placeHolder="Email"
+          iconType="font-awesome"
+          icon="address-book"
         />
         <Text style={styles.text}>Surname</Text>
         <AuthCustomInput
           isHidden={false}
           inputType="email-address"
           placeHolder="Email"
+          iconType="font-awesome"
+          icon="address-book"
         />
 
         <View
@@ -127,28 +161,25 @@ const Register = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <View>
-            <TouchableOpacity
-              touchSoundDisabled={true}
-              style={{justifyContent: 'flex-end'}}
-              onPress={() => handleNav()}>
-              <Text>Already in? Login</Text>
-            </TouchableOpacity>
-          </View>
+          <View></View>
           <AuthCustomButton
-            title={'Next'}
+            title={'Register'}
             onPressEvent={() => {
               setScreenIndex(0);
             }}
           />
         </View>
+        <Text style={styles.terms}>
+          By Registering You Accept Terms And Conditions
+        </Text>
       </View>
     </View>,
   ];
 
   return firstScreen[screenIndex];
 };
-const useStyles = (windowDim: ScaledSize) => {
+const useStyles = (windowDim: ScaledSize, Color: ColorState) => {
+  const ColorSchema = Color.colors;
   const styles = StyleSheet.create({
     mainView: {
       flex: 1,
@@ -179,6 +210,17 @@ const useStyles = (windowDim: ScaledSize) => {
       fontWeight: 'bold',
       fontSize: windowDim.fontScale * 25,
       fontStyle: 'normal',
+      color: ColorSchema.text,
+    },
+    alreadyLogin: {
+      color: ColorSchema.text,
+    },
+    terms: {
+      color: ColorSchema.text,
+      justifyContent: 'flex-end',
+      alignSelf: 'center',
+      position: 'absolute',
+      bottom: windowDim.scale * 12,
     },
   });
   return styles;

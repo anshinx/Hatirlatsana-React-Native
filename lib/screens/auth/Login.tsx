@@ -9,32 +9,43 @@ import {
   ScaledSize,
 } from 'react-native';
 import React from 'react';
-import {ColorSchema} from '../../assets';
 import AuthCustomInput from '../../components/input/AuthCustomInput';
 import {acur} from '../../assets';
-import LinearGradient from 'react-native-linear-gradient';
 import AuthCustomButton from '../../components/button/AuthCustomButton';
 import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../../redux/store/store';
+import {fetchUserByToken, signIn} from '../../redux/reducers/userReducer';
+import {ColorState} from '../../redux/reducers/colors.reducer';
 
 const Login = () => {
   const windowDim = Dimensions.get('window');
   const useNav: any = useNavigation();
-  const styles = useStyles(windowDim);
+  const colors = useSelector((state: RootState) => state.colors);
 
+  const styles = useStyles(windowDim, colors);
+  const [creds, setCreds] = React.useState({} as any);
   const handleNav = () => {
     useNav.navigate('Register');
   };
+
+  const dispatch: any = useDispatch();
 
   return (
     <View style={styles.mainView}>
       <Image source={acur} resizeMode="contain" style={styles.image} />
       <View style={styles.inputZone}>
         <Text style={styles.loginText}>LOGIN</Text>
-        <Text style={styles.text}>Email</Text>
+        <Text style={styles.text}>Username/Email</Text>
         <AuthCustomInput
           isHidden={false}
           inputType="email-address"
-          placeHolder="Email"
+          placeHolder="Username/Email"
+          icon="user"
+          iconType="font-awesome"
+          onChange={(e: string) => {
+            setCreds({...creds, usermail: e});
+          }}
         />
         <Text style={styles.text}>Password</Text>
         <AuthCustomInput
@@ -42,34 +53,44 @@ const Login = () => {
           placeHolder="Password"
           icon="lock"
           iconType="font-awesome"
+          onChange={(e: string) => {
+            setCreds({...creds, password: e});
+          }}
         />
         <View
           style={{
-            marginHorizontal: windowDim.width * 0.05,
             flexDirection: 'row',
+            justifyContent: 'space-between',
           }}>
           <View>
             <TouchableOpacity touchSoundDisabled={true}>
-              <Text>Forget Password ?</Text>
+              <Text style={styles.text}>Forget Password ?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               touchSoundDisabled={true}
               onPress={() => handleNav()}>
-              <Text>New around here ? Register</Text>
+              <Text style={styles.text}>New around here ? Register</Text>
             </TouchableOpacity>
           </View>
-          <AuthCustomButton title={'Login'} />
+          <AuthCustomButton
+            title={'Login'}
+            onPressEvent={async () => {
+              await dispatch(signIn(creds));
+              await dispatch(fetchUserByToken());
+            }}
+          />
         </View>
       </View>
     </View>
   );
 };
-const useStyles = (windowDim: ScaledSize) => {
+const useStyles = (windowDim: ScaledSize, colors: ColorState) => {
+  const ColorSchema = colors.colors;
   const styles = StyleSheet.create({
     mainView: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: ColorSchema.background_t,
     },
     image: {
       width: windowDim.width,
@@ -96,6 +117,7 @@ const useStyles = (windowDim: ScaledSize) => {
       fontWeight: 'bold',
       fontSize: windowDim.fontScale * 25,
       fontStyle: 'normal',
+      color: ColorSchema.text + 'ff',
     },
   });
   return styles;
