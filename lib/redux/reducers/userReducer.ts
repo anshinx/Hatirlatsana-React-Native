@@ -5,20 +5,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ip = 'http://192.168.0.15:1881';
 
-interface User {
-  name?: string;
-  surname?: string;
-  username?: string;
-  token?: string;
-  refresh?: string;
-  email?: string;
-  exp?: number;
-  iat?: number;
-  _id?: string;
-  email_verified?: boolean;
-}
 export interface UserType {
-  user: User;
+  user?: {
+    name?: string;
+    surname?: string;
+    username?: string;
+
+    email?: string;
+    exp?: number;
+    iat?: number;
+    _id?: string;
+    email_verified?: boolean;
+  };
   loading: 'idle' | 'pending' | 'succeeded' | 'failed';
   cookies: {
     authToken?: string;
@@ -45,39 +43,43 @@ const getToken = async (key: string) => {
 };
 
 export const fetchUserByToken = createAsyncThunk('fetchUser', async () => {
-  var _user;
-  if ((await getToken('token')) !== null) {
-    const token = await getToken('token');
-    const fetchData = await axios.get(ip + '/user/reAuth', {
-      headers: {
-        Authorization: `bearer ${token}`,
-      },
-    });
+  try {
+    var _user;
 
-    const refToken = await getToken('refToken');
-    const authToken = await getToken('token');
-    const {email, created_at, email_verified, name, surname, _id} =
-      fetchData.data.user;
-    const user = {
-      exp: fetchData.data.exp,
-      iat: fetchData.data.iat,
-      email,
-      created_at,
-      email_verified,
-      name,
-      surname,
-      _id,
-    };
-    _user = {
-      user,
-      headers: {refToken, authToken},
-    };
+    const token = await getToken('token');
+    console.log(token);
+    if ((await getToken('token')) !== undefined) {
+      const fetchData = await axios.get(ip + '/user/reAuth', {
+        headers: {
+          Authorization: `bearer ${token}`,
+        },
+      });
+      console.log(fetchData.data);
+      const refToken = await getToken('refToken');
+      const authToken = await getToken('token');
+      const {email, created_at, email_verified, name, surname, _id} =
+        fetchData.data;
+      const user = {
+        email,
+        created_at,
+        email_verified,
+        name,
+        surname,
+        _id,
+      };
+      _user = {
+        user,
+        headers: {refToken, authToken},
+      };
+    }
+    return _user;
+  } catch (error) {
+    console.error(error);
   }
-  return _user;
 });
 
 const initialState: UserType = {
-  user: {},
+  user: undefined,
   cookies: {},
   loading: 'idle',
 };
@@ -91,12 +93,15 @@ export const userSlice = createSlice({
       state.user = action.payload;
       state.loading = 'succeeded';
       console.log(state.user);
-      console.log(state.loading)
+      console.log(state.loading);
     });
     builder.addCase(fetchUserByToken.pending, (state, action) => {
-      console.log(state.loading)
+      console.log(state.loading);
       state.loading = 'pending';
-      console.log(state.loading)
+      console.log(state.loading);
+    });
+    builder.addCase(fetchUserByToken.rejected, (state, action) => {
+      console.log(state.user);
     });
   },
   reducers: {
@@ -124,7 +129,12 @@ export const userSlice = createSlice({
     },
 
     signUp: () => {},
-    signOut: () => {},
+    signOut: state => {
+      AsyncStorage.removeItem('@token');
+      AsyncStorage.removeItem('@refToken');
+
+      state.user = {};
+    },
     renewToken: () => {},
   },
 });

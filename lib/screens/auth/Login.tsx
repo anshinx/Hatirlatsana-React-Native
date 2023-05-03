@@ -76,6 +76,7 @@ const Login = () => {
           <AuthCustomButton
             title={'Login'}
             onPressEvent={async () => {
+              
               await dispatch(signIn(creds));
               await dispatch(fetchUserByToken());
             }}

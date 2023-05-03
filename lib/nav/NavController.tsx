@@ -9,6 +9,8 @@ import {changeTheme} from '../redux/reducers/colors.reducer';
 import {fetchUserByToken} from '../redux/reducers/userReducer';
 import {RootState} from '../redux/store/store';
 import {isLoading} from 'expo-font';
+import {Button} from '@rneui/base';
+import {signOut} from '../redux/reducers/userReducer';
 
 const NavController = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -21,24 +23,37 @@ const NavController = () => {
 
   useEffect(() => {
     dispatch(fetchUserByToken());
-  }, []);
+  }, [userSelector.user]);
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{headerShown: false}}
+  if (userSelector.user) {
+    return (
+      <View>
+        <Button
+          title={'Logout'}
+          onPress={() => {
+            dispatch(signOut());
+          }}
         />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={{headerShown: false}}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+      </View>
+    );
+  } else {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Register"
+            component={Register}
+            options={{headerShown: false}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 };
 
 export default NavController;
