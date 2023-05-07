@@ -132,8 +132,9 @@ export const userSlice = createSlice({
     signOut: state => {
       AsyncStorage.removeItem('@token');
       AsyncStorage.removeItem('@refToken');
-
+      state.loading = 'pending';
       state.user = {};
+      state.loading = 'idle';
     },
     renewToken: () => {},
   },

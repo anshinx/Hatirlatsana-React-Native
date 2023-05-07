@@ -11,30 +11,32 @@ import {RootState} from '../redux/store/store';
 import {isLoading} from 'expo-font';
 import {Button} from '@rneui/base';
 import {signOut} from '../redux/reducers/userReducer';
+import Reminder from '../screens/main/Reminder';
 
 const NavController = () => {
   const isDarkMode = useColorScheme() === 'dark';
   const Stack: any = createNativeStackNavigator();
   const userSelector = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<any>();
+  const [loading, setLoading] = React.useState(true);
+
   useEffect(() => {
     dispatch(changeTheme(isDarkMode));
   }, [changeTheme]);
 
   useEffect(() => {
-    dispatch(fetchUserByToken());
-  }, [userSelector.user]);
+    if (userSelector.loading === 'idle' || userSelector.loading === 'failed') {
+      dispatch(fetchUserByToken());
+    }
+  }, [userSelector.loading]);
 
   if (userSelector.user) {
     return (
-      <View>
-        <Button
-          title={'Logout'}
-          onPress={() => {
-            dispatch(signOut());
-          }}
-        />
-      </View>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Hatırlatsana" component={Reminder} />
+        </Stack.Navigator>
+      </NavigationContainer>
     );
   } else {
     return (
