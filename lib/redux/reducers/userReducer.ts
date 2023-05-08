@@ -7,17 +7,22 @@ const ip = 'http://192.168.0.15:1881';
 
 export interface UserType {
   user?: {
-    name?: string;
-    surname?: string;
-    username?: string;
-
-    email?: string;
-    exp?: number;
-    iat?: number;
-    _id?: string;
-    email_verified?: boolean;
+    user?: {
+      name?: string;
+      surname?: string;
+      username?: string;
+      email?: string;
+      exp?: number;
+      iat?: number;
+      _id?: string;
+      email_verified?: boolean;
+    };
+    headers?: {
+      authToken?: string;
+      refToken?: string;
+    };
   };
-  loading: 'idle' | 'pending' | 'succeeded' | 'failed';
+  loading: 'loading' | 'idle' | 'pending' | 'succeeded' | 'failed';
   cookies: {
     authToken?: string;
     refToken?: string;
@@ -42,23 +47,48 @@ const getToken = async (key: string) => {
   }
 };
 
+const renewToken = async () => {
+  try {
+    const refToken = await getToken('refToken');
+
+    const fetchData = await axios.get(ip + '/user/refresh', {
+      data: {refreshToken: refToken},
+    });
+    const authToken = fetchData.headers['auth-token'];
+    const refToken2 = fetchData.headers['ref-token'];
+    console.log("token reneved")
+    storeToken('token', authToken);
+    storeToken('refToken', refToken2);
+    
+  } catch (error) {
+    console.error(error);
+  }
+
+};
+
 export const fetchUserByToken = createAsyncThunk('fetchUser', async () => {
   try {
     var _user;
 
     const token = await getToken('token');
-    console.log(token);
+
     if ((await getToken('token')) !== undefined) {
-      const fetchData = await axios.get(ip + '/user/reAuth', {
+      var fetchData = await axios.get(ip + '/user/reAuth', {
         headers: {
           Authorization: `bearer ${token}`,
         },
       });
-      console.log(fetchData.data);
+
+      if (fetchData.data.err === 'EXPIRED_TOKEN') {
+        renewToken().then(() => {
+          fetchUserByToken();
+        });
+      }
       const refToken = await getToken('refToken');
       const authToken = await getToken('token');
       const {email, created_at, email_verified, name, surname, _id} =
         fetchData.data;
+      console.log(fetchData.data);
       const user = {
         email,
         created_at,
@@ -81,7 +111,7 @@ export const fetchUserByToken = createAsyncThunk('fetchUser', async () => {
 const initialState: UserType = {
   user: undefined,
   cookies: {},
-  loading: 'idle',
+  loading: 'loading',
 };
 
 export const userSlice = createSlice({
@@ -89,16 +119,11 @@ export const userSlice = createSlice({
   initialState,
   extraReducers: builder => {
     builder.addCase(fetchUserByToken.fulfilled, (state, action: any) => {
-      console.log(action);
       state.user = action.payload;
       state.loading = 'succeeded';
-      console.log(state.user);
-      console.log(state.loading);
     });
     builder.addCase(fetchUserByToken.pending, (state, action) => {
-      console.log(state.loading);
-      state.loading = 'pending';
-      console.log(state.loading);
+      state.loading = 'loading';
     });
     builder.addCase(fetchUserByToken.rejected, (state, action) => {
       console.log(state.user);
@@ -136,10 +161,9 @@ export const userSlice = createSlice({
       state.user = {};
       state.loading = 'idle';
     },
-    renewToken: () => {},
   },
 });
 
-export const {signIn, signUp, signOut, renewToken} = userSlice.actions;
+export const {signIn, signUp, signOut} = userSlice.actions;
 
 export default userSlice.reducer;

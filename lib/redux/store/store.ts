@@ -1,5 +1,4 @@
 import {configureStore} from '@reduxjs/toolkit';
-import counterReducer from '../reducers/counterReducer';
 import userReducer from '../reducers/userReducer';
 import colorsReducer from '../reducers/colors.reducer';
 

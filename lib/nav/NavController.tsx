@@ -1,4 +1,4 @@
-import {View, Text, useColorScheme} from 'react-native';
+import {View, Text, useColorScheme, ActivityIndicator} from 'react-native';
 import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -25,12 +25,30 @@ const NavController = () => {
   }, [changeTheme]);
 
   useEffect(() => {
-    if (userSelector.loading === 'idle' || userSelector.loading === 'failed') {
+    if (userSelector.loading === 'loading' || userSelector.loading === 'idle') {
       dispatch(fetchUserByToken());
     }
   }, [userSelector.loading]);
-
-  if (userSelector.user) {
+  if (userSelector.loading === 'loading') {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          alignContent: 'center',
+        }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: 'bold',
+          }}>
+          Loading...
+        </Text>
+      </View>
+    );
+  } else if (userSelector.user) {
     return (
       <NavigationContainer>
         <Stack.Navigator>
