@@ -85,7 +85,11 @@ const Register = () => {
             onPress={() => {
               setScreenIndex(screenIndex - 1);
             }}>
-            <Icon type="font-awesome" name="arrow-left" />
+            <Icon
+              type="font-awesome"
+              name="arrow-left"
+              color={colors.colors.text}
+            />
           </Pressable>
           <Text style={styles.registerText}>Register</Text>
           <Text style={{marginHorizontal: windowDim.scale * 3}} />
@@ -133,7 +137,11 @@ const Register = () => {
             onPress={() => {
               setScreenIndex(screenIndex - 1);
             }}>
-            <Icon type="font-awesome" name="arrow-left" />
+            <Icon
+              type="font-awesome"
+              name="arrow-left"
+              color={colors.colors.text}
+            />
           </Pressable>
           <Text style={styles.registerText}>Register</Text>
           <Text style={{marginHorizontal: windowDim.scale * 3}} />

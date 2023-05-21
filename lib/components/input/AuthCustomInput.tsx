@@ -30,6 +30,7 @@ const AuthCustomInput = ({
 }: props) => {
   const windowDim = Dimensions.get('window');
 
+  const [iColor, setIColor] = React.useState('#000');
   return (
     <View style={{flexDirection: 'row', marginHorizontal: windowDim.scale * 3}}>
       <View
@@ -44,7 +45,7 @@ const AuthCustomInput = ({
           marginVertical: windowDim.scale * 2,
           padding: windowDim.scale * 2,
         }}>
-        <Icon type={iconType} name={icon} />
+        <Icon type={iconType} name={icon} color={iColor} />
       </View>
       <View
         style={{
@@ -63,6 +64,12 @@ const AuthCustomInput = ({
           secureTextEntry={isHidden}
           placeholder={placeHolder}
           keyboardType={inputType}
+          onFocus={t => {
+            setIColor('#00F');
+          }}
+          onBlur={t => {
+            setIColor('#000');
+          }}
           style={{color: '#000'}}
           placeholderTextColor="#aaa"
           onChange={e => {

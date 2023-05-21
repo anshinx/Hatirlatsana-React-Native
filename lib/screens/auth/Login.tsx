@@ -8,15 +8,15 @@ import {
   TouchableOpacity,
   ScaledSize,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import AuthCustomInput from '../../components/input/AuthCustomInput';
 import {acur} from '../../assets';
 import AuthCustomButton from '../../components/button/AuthCustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../redux/store/store';
-import {fetchUserByToken, signIn} from '../../redux/reducers/userReducer';
 import {ColorState} from '../../redux/reducers/colors.reducer';
+import {signInAsync} from '../../redux/reducers/userReducer';
 
 const Login = () => {
   const windowDim = Dimensions.get('window');
@@ -28,8 +28,13 @@ const Login = () => {
   const handleNav = () => {
     useNav.navigate('Register');
   };
-
+  const userSelector = useSelector((state: RootState) => state.user);
   const dispatch: any = useDispatch();
+
+  const handleSignIn = (creds: any, dispatch: any) => {
+    dispatch(signInAsync(creds));
+    console.log('pressed');
+  };
 
   return (
     <View style={styles.mainView}>
@@ -49,7 +54,7 @@ const Login = () => {
         />
         <Text style={styles.text}>Password</Text>
         <AuthCustomInput
-          isHidden={true}
+          isHidden={false}
           placeHolder="Password"
           icon="lock"
           iconType="font-awesome"
@@ -76,9 +81,7 @@ const Login = () => {
           <AuthCustomButton
             title={'Login'}
             onPressEvent={async () => {
-              
-              await dispatch(signIn(creds));
-              await dispatch(fetchUserByToken());
+              handleSignIn(creds, dispatch);
             }}
           />
         </View>
@@ -91,7 +94,6 @@ const useStyles = (windowDim: ScaledSize, colors: ColorState) => {
   const styles = StyleSheet.create({
     mainView: {
       flex: 1,
-      backgroundColor: ColorSchema.background_t,
     },
     image: {
       width: windowDim.width,
@@ -115,9 +117,9 @@ const useStyles = (windowDim: ScaledSize, colors: ColorState) => {
     loginText: {
       justifyContent: 'center',
       textAlign: 'center',
-      fontWeight: 'bold',
+      fontWeight: '900',
       fontSize: windowDim.fontScale * 25,
-      fontStyle: 'normal',
+      fontStyle: 'italic',
       color: ColorSchema.text + 'ff',
     },
   });
