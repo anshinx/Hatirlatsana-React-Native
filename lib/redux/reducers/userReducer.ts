@@ -4,9 +4,10 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {act} from 'react-test-renderer';
 
-const ip = 'http://192.168.1.96:1881';
+const ip = 'http://192.168.137.1-:1881';
 
 export interface UserType {
+  err?: string;
   user?: {
     name?: string;
     surname?: string;
@@ -44,7 +45,7 @@ export const signInAsync = createAsyncThunk(
         password: data.password,
       })
       .catch(err => console.log(err.response.data));
-    console.log(fetchedData?.headers);
+    console.log(fetchedData);
     await AsyncStorage.setItem('authToken', fetchedData?.headers['auth-token'])
       .then(() => {
         console.log('authToken saved');
@@ -70,6 +71,86 @@ export const signInAsync = createAsyncThunk(
       _id,
     };
 
+    return _user;
+  },
+);
+export const signUpAsync = createAsyncThunk(
+  'user/signUp/',
+  async (data: {
+    name: string;
+    surname: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => {
+    if (!isEmailValid(data.email)) console.log('email is not valid');
+    var _user;
+    const RegisterFetch = await axios
+      .post(`${ip}/api/auth/create`, {
+        name: data.name,
+        surname: data.surname,
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      })
+      .catch(err => console.log(err.response.data));
+    console.log(RegisterFetch?.headers);
+
+    AsyncStorage.setItem('authToken', RegisterFetch?.headers['auth-token'])
+      .then(() => {
+        console.log('authToken saved');
+      })
+      .catch(err => console.log(err));
+
+    await AsyncStorage.setItem('refToken', RegisterFetch?.headers['ref-token'])
+      .then(() => {
+        console.log('refToken saved');
+      })
+      .catch(err => console.log(err));
+
+    const refreshToken = await AsyncStorage.getItem('refToken');
+    const refreshingSession = await axios
+      .post(`${ip}/api/auth/refresh`, {
+        refreshToken: refreshToken,
+      })
+      .catch(err => console.log('SIWT ERR: ', err.response.data));
+    await AsyncStorage.setItem(
+      'authToken',
+      refreshingSession?.headers['auth-token'],
+    )
+      .then(() => {
+        console.log('authToken saved');
+      })
+
+      .catch(err => console.log(err));
+    await AsyncStorage.setItem(
+      'refToken',
+      refreshingSession?.headers['ref-token'],
+    )
+      .then(() => {
+        console.log('refToken saved');
+      })
+      .catch(err => console.log('SIWT REF', err));
+    const fetchedData = await axios
+      .get(`${ip}/api/auth/reAuth`, {
+        headers: {
+          Authorization: `Bearer ${refreshingSession?.headers['auth-token']}`,
+        },
+      })
+      .catch(err => console.log('SIWT REAUTH : ', err.response.data));
+
+    const {exp, iat, user} = fetchedData?.data;
+    const {name, surname, username, email, email_verified, _id} = user;
+    _user = {
+      name,
+      surname,
+      username,
+      email,
+      email_verified,
+      exp,
+      iat,
+      _id,
+    };
     return _user;
   },
 );
@@ -149,6 +230,7 @@ export const userSlice = createSlice({
         state.loading = 'idle';
         console.log(action.payload);
         console.log('rejected');
+        state.err = 'Rejection Error';
       });
 
     builder
@@ -166,6 +248,23 @@ export const userSlice = createSlice({
       .addCase(signInWithTokenAsync.rejected, (state, action) => {
         state.loading = 'idle';
         console.log('SIWT', action.payload);
+      });
+
+    builder
+      .addCase(signUpAsync.pending, state => {
+        state.loading = 'loading';
+        console.log('waiting for server response');
+      })
+      .addCase(signUpAsync.fulfilled, (state, action) => {
+        state.loading = 'idle';
+
+        state.user = action.payload;
+
+        console.log('fulfilled');
+      })
+      .addCase(signUpAsync.rejected, (state, action) => {
+        state.loading = 'idle';
+        console.log('SUA', action.payload);
       });
   },
   reducers: {

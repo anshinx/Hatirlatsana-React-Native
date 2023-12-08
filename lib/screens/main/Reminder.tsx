@@ -39,19 +39,7 @@ const Reminder = () => {
     ),
   });
 
-  return (
-    <View style={styles.mainView}>
-      <Text>Nearest Events</Text>
-      <ReminderCardView />
-      <ReminderCardView />
-      <ReminderCardView />
-
-      <Text>Upcoming</Text>
-      <ReminderCardView />
-      <ReminderCardView />
-      <ReminderCardView />
-    </View>
-  );
+  return <View style={styles.mainView}></View>;
 };
 
 const useStyles = (windowDim: any, colors: ColorState) => {

@@ -121,6 +121,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        relase{
+            storeFile file('prod.keystore')
+            storePassword 'yener1245'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
     }
     buildTypes {
         debug {

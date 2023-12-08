@@ -11,6 +11,7 @@ import {RootState} from '../redux/store/store';
 import {signInWithTokenAsync, signOut} from '../redux/reducers/userReducer';
 import Reminder from '../screens/main/Reminder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Button} from '@rneui/base';
 
 const NavController = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -58,6 +59,12 @@ const NavController = () => {
           }}>
           Loading...
         </Text>
+        <Button
+          onPress={() => {
+            dispatch(signOut());
+          }}>
+          Sign Out
+        </Button>
       </View>
     );
   } else if (userSelector.user?._id !== undefined) {

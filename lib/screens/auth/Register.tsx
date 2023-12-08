@@ -18,16 +18,27 @@ import AuthCustomButton from '../../components/button/AuthCustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {Icon} from '@rneui/base';
 import {ColorState} from '../../redux/reducers/colors.reducer';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../redux/store/store';
+import {UserType, signUpAsync} from '../../redux/reducers/userReducer';
 
 const Register = () => {
   const useNav: any = useNavigation();
   const windowDim = Dimensions.get('window');
   const colors = useSelector((state: RootState) => state.colors);
   const styles = useStyles(windowDim, colors);
-  const [screenIndex, setScreenIndex] = React.useState(0);
 
+  const dispatch: any = useDispatch();
+  const [screenIndex, setScreenIndex] = React.useState(0);
+  const [creds, setCreds] = React.useState(
+    {} as {
+      username: any;
+      email: string;
+      password: string;
+      name: string;
+      surname: string;
+    },
+  );
   const handleNav = () => {
     useNav.navigate('Login');
   };
@@ -48,6 +59,12 @@ const Register = () => {
           isHidden={false}
           inputType="email-address"
           placeHolder="Email"
+          onChange={(event: any) => {
+            setCreds({
+              ...creds,
+              email: event,
+            });
+          }}
         />
 
         <View
@@ -101,6 +118,12 @@ const Register = () => {
           placeHolder="Username"
           icon="user"
           iconType="font-awesome"
+          onChange={(event: any) => {
+            setCreds({
+              ...creds,
+              username: event,
+            });
+          }}
         />
         <Text style={styles.text}>Password</Text>
         <AuthCustomInput
@@ -108,6 +131,12 @@ const Register = () => {
           placeHolder="Password"
           icon="lock"
           iconType="font-awesome"
+          onChange={(event: any) => {
+            setCreds({
+              ...creds,
+              password: event,
+            });
+          }}
         />
         <View
           style={{
@@ -153,6 +182,12 @@ const Register = () => {
           placeHolder="Email"
           iconType="font-awesome"
           icon="address-book"
+          onChange={(event: any) => {
+            setCreds({
+              ...creds,
+              name: event,
+            });
+          }}
         />
         <Text style={styles.text}>Surname</Text>
         <AuthCustomInput
@@ -161,6 +196,12 @@ const Register = () => {
           placeHolder="Email"
           iconType="font-awesome"
           icon="address-book"
+          onChange={(event: any) => {
+            setCreds({
+              ...creds,
+              surname: event,
+            });
+          }}
         />
 
         <View
@@ -173,7 +214,7 @@ const Register = () => {
           <AuthCustomButton
             title={'Register'}
             onPressEvent={() => {
-              setScreenIndex(0);
+              dispatch(signUpAsync(creds));
             }}
           />
         </View>

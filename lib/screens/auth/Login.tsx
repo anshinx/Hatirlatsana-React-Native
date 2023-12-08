@@ -84,6 +84,11 @@ const Login = () => {
               handleSignIn(creds, dispatch);
             }}
           />
+          {userSelector.err ? (
+            <Text style={{color: 'red', textAlign: 'center'}}>
+              {userSelector.err}
+            </Text>
+          ) : null}
         </View>
       </View>
     </View>
